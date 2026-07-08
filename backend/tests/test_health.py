@@ -10,3 +10,4 @@ def test_health_returns_ok() -> None:
     body = response.json()
     assert body["status"] == "ok"
     assert body["llm_provider"] == "fake"
+    assert response.headers["x-request-id"]  # request context middleware is active
