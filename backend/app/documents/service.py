@@ -10,13 +10,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import UploadFile
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
 from app.core.config import get_settings
 from app.core.errors import NotFoundError, QuotaExceeded, ValidationFailed
 from app.documents.models import Document
+from app.ingestion.models import Chunk
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
@@ -130,5 +131,6 @@ async def delete_document(
 ) -> None:
     document = await get_document(session, owner=owner, document_id=document_id)
     document.deleted_at = datetime.now(UTC)
-    # Task 5 adds vector cleanup here once the chunks table exists (§4.2).
+    # §4.2: soft-deleted documents must vanish from retrieval immediately
+    await session.execute(delete(Chunk).where(Chunk.document_id == document.id))
     await session.commit()

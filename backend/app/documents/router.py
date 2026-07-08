@@ -3,7 +3,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
@@ -11,6 +11,7 @@ from app.auth.models import User
 from app.core.db import get_db_session
 from app.documents import service
 from app.documents.schemas import DocumentListOut, DocumentOut
+from app.ingestion.service import ingest_document
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
@@ -19,8 +20,11 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @router.post("", status_code=status.HTTP_202_ACCEPTED)
-async def upload_document(file: UploadFile, user: CurrentUser, session: DbSession) -> DocumentOut:
+async def upload_document(
+    file: UploadFile, background: BackgroundTasks, user: CurrentUser, session: DbSession
+) -> DocumentOut:
     document = await service.upload_document(session, owner=user, upload=file)
+    background.add_task(ingest_document, document.id)  # §9: v1 runs ingestion in-process
     return DocumentOut.model_validate(document)
 
 

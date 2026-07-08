@@ -171,10 +171,14 @@ def test_list_only_shows_own_documents(client: TestClient) -> None:
 
 def test_detail_returns_processing_status(client: TestClient) -> None:
     headers = _auth_headers(client)
-    document_id = _upload(client, headers).json()["id"]
+    document_id = _upload(
+        client, headers, filename="notes.txt", content=b"some notes", mime="text/plain"
+    ).json()["id"]
+    # TestClient runs the ingestion BackgroundTask before returning, so the
+    # lifecycle has already advanced uploaded -> processing -> ready here.
     response = client.get(f"/api/v1/documents/{document_id}", headers=headers)
     assert response.status_code == 200
-    assert response.json()["status"] == "uploaded"
+    assert response.json()["status"] == "ready"
 
 
 def test_detail_of_someone_elses_document_is_404(client: TestClient) -> None:
