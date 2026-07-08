@@ -1,0 +1,55 @@
+"""Document endpoints: upload, list, detail, delete (§4.2)."""
+
+import uuid
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query, UploadFile, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
+from app.core.db import get_db_session
+from app.documents import service
+from app.documents.schemas import DocumentListOut, DocumentOut
+
+router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
+
+DbSession = Annotated[AsyncSession, Depends(get_db_session)]
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@router.post("", status_code=status.HTTP_202_ACCEPTED)
+async def upload_document(file: UploadFile, user: CurrentUser, session: DbSession) -> DocumentOut:
+    document = await service.upload_document(session, owner=user, upload=file)
+    return DocumentOut.model_validate(document)
+
+
+@router.get("")
+async def list_documents(
+    user: CurrentUser,
+    session: DbSession,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,  # §6: limit ≤ 100
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> DocumentListOut:
+    documents, total = await service.list_documents(
+        session, owner=user, limit=limit, offset=offset
+    )
+    return DocumentListOut(
+        items=[DocumentOut.model_validate(d) for d in documents],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get("/{document_id}")
+async def get_document(
+    document_id: uuid.UUID, user: CurrentUser, session: DbSession
+) -> DocumentOut:
+    document = await service.get_document(session, owner=user, document_id=document_id)
+    return DocumentOut.model_validate(document)
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_document(document_id: uuid.UUID, user: CurrentUser, session: DbSession) -> None:
+    await service.delete_document(session, owner=user, document_id=document_id)

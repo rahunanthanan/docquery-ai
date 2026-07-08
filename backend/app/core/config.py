@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     access_token_ttl_minutes: int = 15
     refresh_token_ttl_days: int = 7
 
+    # Uploads & quotas (§6)
+    upload_dir: str = "/data/uploads"
+    max_upload_bytes: int = 20 * 1024 * 1024
+    max_documents_per_user: int = 25
+
     # LLM provider — "fake" runs the whole app with no external API keys
     llm_provider: Literal["fake", "openai", "anthropic"] = "fake"
     openai_api_key: str | None = None

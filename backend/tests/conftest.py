@@ -7,6 +7,7 @@ recreated once per session, and tables are truncated after every test.
 
 import asyncio
 import os
+import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -16,6 +17,9 @@ os.environ.setdefault(
 )
 os.environ["ENVIRONMENT"] = "test"
 os.environ.setdefault("JWT_SECRET", "test-secret-not-for-production-padded-to-32b")
+os.environ["UPLOAD_DIR"] = tempfile.mkdtemp(prefix="docquery-uploads-")
+os.environ["MAX_UPLOAD_BYTES"] = str(1024 * 1024)  # 1 MB keeps the oversize test fast
+os.environ["MAX_DOCUMENTS_PER_USER"] = "5"
 
 import pytest  # noqa: E402
 from alembic import command  # noqa: E402

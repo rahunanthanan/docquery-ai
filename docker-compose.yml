@@ -22,6 +22,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-docquery}:${POSTGRES_PASSWORD:-docquery}@db:5432/${POSTGRES_DB:-docquery}
     ports:
       - "8000:8000"
+    volumes:
+      - uploads_data:/data/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -37,3 +39,4 @@ services:
 
 volumes:
   db_data:
+  uploads_data:

@@ -9,7 +9,7 @@ COPY alembic ./alembic
 
 # ---- runtime stage ----
 FROM python:3.12-slim
-RUN useradd --create-home appuser
+RUN useradd --create-home appuser && mkdir -p /data/uploads && chown appuser /data/uploads
 WORKDIR /app
 COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
