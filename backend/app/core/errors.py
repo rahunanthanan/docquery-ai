@@ -30,6 +30,16 @@ class NotFoundError(AppError):
     http_status = 404
 
 
+class UnauthorizedError(AppError):
+    code = "UNAUTHORIZED"
+    http_status = 401
+
+
+class ConflictError(AppError):
+    code = "CONFLICT"
+    http_status = 409
+
+
 class PermissionDeniedError(AppError):
     code = "PERMISSION_DENIED"
     http_status = 403

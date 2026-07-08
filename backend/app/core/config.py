@@ -19,8 +19,12 @@ class Settings(BaseSettings):
     # Database (used from Task 3 onwards; declared now so compose wiring is testable)
     database_url: str = "postgresql+asyncpg://docquery:docquery@db:5432/docquery"
 
-    # Auth (placeholder until Task 3 — must be overridden outside local dev)
+    # Auth — jwt_secret must be overridden outside local dev (§2: access 15 min,
+    # refresh 7 days in an httpOnly cookie)
     jwt_secret: str = "change-me-in-.env"
+    jwt_algorithm: str = "HS256"
+    access_token_ttl_minutes: int = 15
+    refresh_token_ttl_days: int = 7
 
     # LLM provider — "fake" runs the whole app with no external API keys
     llm_provider: Literal["fake", "openai", "anthropic"] = "fake"

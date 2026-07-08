@@ -9,8 +9,12 @@ dependencies = [
     "pydantic>=2.10",
     "pydantic-settings>=2.7",
     "structlog>=25.1",
-    "sqlalchemy>=2.0.36",
+    "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30",
+    "alembic>=1.14",
+    "pyjwt>=2.10",
+    "bcrypt>=4.2",
+    "email-validator>=2.2",
 ]
 
 [project.optional-dependencies]
@@ -21,12 +25,20 @@ dev = [
     "mypy>=1.14",
 ]
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+extend-exclude = ["build"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+# our alembic/ scripts directory makes ruff misclassify the alembic package
+known-third-party = ["alembic"]
 
 [tool.ruff.lint.per-file-ignores]
 # Exception names (ValidationFailed, InvalidTransition, QuotaExceeded) are

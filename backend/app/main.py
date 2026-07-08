@@ -15,6 +15,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.auth.router import router as auth_router
 from app.core.config import get_settings
 from app.core.errors import AppError, error_envelope
 from app.core.logging import configure_logging
@@ -92,6 +93,8 @@ def create_app() -> FastAPI:
             )
         response.headers["X-Request-ID"] = request_id
         return response
+
+    app.include_router(auth_router)
 
     app.add_exception_handler(AppError, _handle_app_error)
     app.add_exception_handler(StarletteHTTPException, _handle_http_exception)
