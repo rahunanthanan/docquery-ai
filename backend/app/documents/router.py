@@ -11,7 +11,7 @@ from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from app.core.db import get_db_session
 from app.documents import service
-from app.documents.schemas import DocumentListOut, DocumentOut
+from app.documents.schemas import DocumentDetailOut, DocumentListOut, DocumentOut
 from app.ingestion.service import ingest_document
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
@@ -56,9 +56,12 @@ async def list_documents(
 @router.get("/{document_id}")
 async def get_document(
     document_id: uuid.UUID, user: CurrentUser, session: DbSession
-) -> DocumentOut:
+) -> DocumentDetailOut:
     document = await service.get_document(session, owner=user, document_id=document_id)
-    return DocumentOut.model_validate(document)
+    count = await service.chunk_count(session, document_id=document.id)
+    return DocumentDetailOut(
+        **DocumentOut.model_validate(document).model_dump(), chunk_count=count
+    )
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)

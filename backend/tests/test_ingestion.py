@@ -86,6 +86,7 @@ def test_markdown_upload_becomes_ready_with_chunks(client: TestClient) -> None:
     assert detail["errorMessage"] is None
 
     rows = _chunk_rows(document_id)
+    assert detail["chunkCount"] == len(rows)  # §3.1: detail page shows chunk count
     assert len(rows) >= 1
     assert rows[0][0] == 0 and rows[0][1] == 1  # chunk_index from 0, page 1
     assert "Interesting facts." in rows[0][2]

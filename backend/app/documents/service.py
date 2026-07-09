@@ -138,6 +138,13 @@ async def get_document(
     return document
 
 
+async def chunk_count(session: AsyncSession, *, document_id: uuid.UUID) -> int:
+    count = await session.scalar(
+        select(func.count()).select_from(Chunk).where(Chunk.document_id == document_id)
+    )
+    return count or 0
+
+
 async def delete_document(
     session: AsyncSession, *, owner: User, document_id: uuid.UUID, ip: str | None = None
 ) -> None:

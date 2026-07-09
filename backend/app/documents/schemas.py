@@ -22,6 +22,10 @@ class DocumentOut(CamelModel):
     created_at: datetime
 
 
+class DocumentDetailOut(DocumentOut):
+    chunk_count: int
+
+
 class DocumentListOut(CamelModel):
     items: list[DocumentOut]
     total: int
