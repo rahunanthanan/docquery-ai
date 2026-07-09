@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     llm_provider: Literal["fake", "openai", "anthropic"] = "fake"
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
+    openai_chat_model: str = "gpt-4o-mini"
+    anthropic_chat_model: str = "claude-haiku-4-5-20251001"
+    openai_embedding_model: str = "text-embedding-3-small"
 
 
 @lru_cache

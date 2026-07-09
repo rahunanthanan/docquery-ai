@@ -20,6 +20,7 @@ from app.core.config import get_settings
 from app.core.errors import AppError, error_envelope
 from app.core.logging import configure_logging
 from app.documents.router import router as documents_router
+from app.qa.router import router as qa_router
 
 logger = structlog.get_logger()
 
@@ -97,6 +98,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(documents_router)
+    app.include_router(qa_router)
 
     app.add_exception_handler(AppError, _handle_app_error)
     app.add_exception_handler(StarletteHTTPException, _handle_http_exception)
