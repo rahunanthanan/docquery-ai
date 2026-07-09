@@ -68,6 +68,13 @@ async def login(
     return _token_response(user, response)
 
 
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(response: Response) -> None:
+    # access tokens live in frontend memory; clearing the refresh cookie
+    # is all the server needs to end the session
+    response.delete_cookie(REFRESH_COOKIE, path="/api/v1/auth")
+
+
 @router.post("/refresh")
 async def refresh(request: Request, response: Response, session: DbSession) -> TokenResponse:
     token = request.cookies.get(REFRESH_COOKIE)

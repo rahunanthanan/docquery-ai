@@ -71,14 +71,15 @@ cd frontend && npx next lint && npm run typecheck && npm test
 This repository is built incrementally in reviewable, commit-sized tasks (see [CONTRIBUTING.md](CONTRIBUTING.md) for conventions).
 
 - [x] **Task 1 — Scaffold**: monorepo, Docker Compose, CI, quality tooling
-- [ ] Task 2 — Backend core: error envelope, structured logging
-- [ ] Task 3 — Auth: JWT, refresh tokens, RBAC (user / reviewer / admin)
-- [ ] Task 4 — Document upload & storage with quotas
-- [ ] Task 5 — Ingestion: parse → chunk → embed → pgvector
-- [ ] Task 6 — RAG Q&A with citations and cost tracking
-- [ ] Task 7 — Human review workflow with status transitions
-- [ ] Task 8 — Audit log & usage dashboard APIs, seed data
-- [ ] Tasks 9–13 — Frontend features: documents, chat, review queue, admin
+- [x] Task 2 — Backend core: error envelope, structured logging
+- [x] Task 3 — Auth: JWT, refresh tokens, RBAC (user / reviewer / admin)
+- [x] Task 4 — Document upload & storage with quotas
+- [x] Task 5 — Ingestion: parse → chunk → embed → pgvector
+- [x] Task 6 — RAG Q&A with citations and cost tracking
+- [x] Task 7 — Human review workflow with status transitions
+- [x] Task 8 — Audit log & usage dashboard APIs, seed data
+- [x] Task 9 — Frontend foundation: API client, auth flow, RoleGuard, layout
+- [ ] Tasks 10–13 — Frontend features: documents, chat, review queue, admin
 
 ### Task 1 acceptance checklist
 

@@ -145,6 +145,21 @@ def test_refresh_rejects_access_token_in_cookie(client: TestClient) -> None:
     assert response.status_code == 401
 
 
+def test_logout_clears_refresh_cookie(client: TestClient) -> None:
+    _register(client)
+    client.post(
+        "/api/v1/auth/login",
+        json={"email": VALID_REGISTER["email"], "password": VALID_REGISTER["password"]},
+    )
+    assert client.cookies.get("refresh_token")
+
+    response = client.post("/api/v1/auth/logout")
+    assert response.status_code == 204
+
+    refresh = client.post("/api/v1/auth/refresh")  # cookie gone → 401
+    assert refresh.status_code == 401
+
+
 def test_refresh_rejects_garbage_token(client: TestClient) -> None:
     client.cookies.set("refresh_token", "not.a.jwt", path="/api/v1/auth")
     response = client.post("/api/v1/auth/refresh")

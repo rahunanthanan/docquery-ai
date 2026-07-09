@@ -12,6 +12,7 @@ from collections.abc import Awaitable, Callable
 import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -99,6 +100,16 @@ def create_app() -> FastAPI:
             )
         response.headers["X-Request-ID"] = request_id
         return response
+
+    # Browser clients send the refresh cookie cross-origin (§3.3), so
+    # credentials must be allowed and origins listed explicitly.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     app.include_router(auth_router)
     app.include_router(documents_router)

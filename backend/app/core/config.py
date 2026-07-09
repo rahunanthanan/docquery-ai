@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     app_name: str = "DocQuery AI"
     environment: Literal["local", "test", "production"] = "local"
 
+    # Comma-separated browser origins allowed to call the API with credentials
+    cors_origins: str = "http://localhost:3000"
+
     # Database (used from Task 3 onwards; declared now so compose wiring is testable)
     database_url: str = "postgresql+asyncpg://docquery:docquery@db:5432/docquery"
 
