@@ -70,3 +70,18 @@ def _clean_tables() -> Iterator[None]:
 def client() -> Iterator[TestClient]:
     with TestClient(create_app()) as test_client:
         yield test_client
+
+
+def set_user_role(email: str, role: str) -> None:
+    """Directly promote a user in the test database (no admin endpoint yet)."""
+
+    async def go() -> None:
+        engine = create_async_engine(TEST_DB_URL)
+        async with engine.begin() as conn:
+            await conn.execute(
+                text("UPDATE users SET role = :role WHERE email = :email"),
+                {"role": role, "email": email},
+            )
+        await engine.dispose()
+
+    asyncio.run(go())

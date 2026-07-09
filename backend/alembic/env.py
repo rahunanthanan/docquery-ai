@@ -7,12 +7,14 @@ from alembic import context
 from sqlalchemy import Connection, pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.auth import models as auth_models  # noqa: F401 — register tables on Base.metadata
+from app.audit import models as audit_models  # noqa: F401 — register tables on Base.metadata
+from app.auth import models as auth_models  # noqa: F401
 from app.core.config import get_settings
 from app.core.db import Base
 from app.documents import models as document_models  # noqa: F401
 from app.ingestion import models as ingestion_models  # noqa: F401
 from app.qa import models as qa_models  # noqa: F401
+from app.review import models as review_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

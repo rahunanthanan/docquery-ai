@@ -5,7 +5,6 @@ per role level to prove the `get_current_user` / `require_role` dependencies
 enforce the §2 hierarchy (user < reviewer < admin).
 """
 
-import asyncio
 import os
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
@@ -14,12 +13,11 @@ import jwt as pyjwt
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.auth.dependencies import get_current_user, require_role
 from app.auth.models import User
 from app.main import create_app
+from tests.conftest import set_user_role
 
 
 def _protected_app() -> FastAPI:
@@ -40,16 +38,6 @@ def _protected_app() -> FastAPI:
     return app
 
 
-async def _set_role(email: str, role: str) -> None:
-    engine = create_async_engine(os.environ["DATABASE_URL"])
-    async with engine.begin() as conn:
-        await conn.execute(
-            text("UPDATE users SET role = :role WHERE email = :email"),
-            {"role": role, "email": email},
-        )
-    await engine.dispose()
-
-
 def _token_for(client: TestClient, role: str) -> str:
     email = f"{role}@example.com"
     response = client.post(
@@ -57,7 +45,7 @@ def _token_for(client: TestClient, role: str) -> str:
         json={"email": email, "password": "sufficiently long 1", "fullName": f"Test {role}"},
     )
     assert response.status_code == 201, response.text
-    asyncio.run(_set_role(email, role))
+    set_user_role(email, role)
     login = client.post(
         "/api/v1/auth/login", json={"email": email, "password": "sufficiently long 1"}
     )
