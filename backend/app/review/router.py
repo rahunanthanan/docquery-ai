@@ -12,7 +12,7 @@ from app.auth.models import User
 from app.core.db import get_db_session
 from app.qa.models import AnswerStatus
 from app.review import service
-from app.review.schemas import DecisionCreate, DecisionOut, QueueOut
+from app.review.schemas import DecisionCreate, DecisionOut, QueueOut, ReviewDetailOut
 
 router = APIRouter(prefix="/api/v1/review", tags=["review"])
 
@@ -32,6 +32,13 @@ async def review_queue(
         session, status=status, limit=limit, offset=offset
     )
     return QueueOut(items=items, total=total, limit=limit, offset=offset)
+
+
+@router.get("/{answer_id}")
+async def review_detail(
+    answer_id: uuid.UUID, reviewer: Reviewer, session: DbSession
+) -> ReviewDetailOut:
+    return await service.review_detail(session, answer_id=answer_id)
 
 
 @router.post("/{answer_id}/decision", status_code=status.HTTP_201_CREATED)

@@ -8,9 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.audit.service import log_event
 from app.auth.models import User
 from app.core.errors import NotFoundError
-from app.qa.models import Answer, AnswerStatus, Question
+from app.ingestion.models import Chunk
+from app.qa.models import Answer, AnswerStatus, Citation, Question
+from app.qa.schemas import CitationOut
+from app.qa.service import SNIPPET_CHARS
 from app.review.models import ReviewDecision
-from app.review.schemas import DecisionOut, QueueItemOut
+from app.review.schemas import DecisionOut, QueueItemOut, ReviewDetailOut
 from app.review.transitions import allowed_decisions, assert_transition
 
 
@@ -49,6 +52,50 @@ async def review_queue(
         for answer, question, email in rows
     ]
     return items, total or 0
+
+
+async def review_detail(session: AsyncSession, *, answer_id: uuid.UUID) -> ReviewDetailOut:
+    row = (
+        await session.execute(
+            select(Answer, Question, User.email)
+            .join(Question, Answer.question_id == Question.id)
+            .join(User, Question.asked_by == User.id)
+            .where(Answer.id == answer_id)
+        )
+    ).first()
+    if row is None:
+        raise NotFoundError("Answer not found.", code="ANSWER_NOT_FOUND")
+    answer, question, email = row
+
+    citation_rows = (
+        await session.execute(
+            select(Citation, Chunk)
+            .join(Chunk, Citation.chunk_id == Chunk.id)
+            .where(Citation.answer_id == answer.id)
+            .order_by(Citation.marker)
+        )
+    ).all()
+    return ReviewDetailOut(
+        answer_id=answer.id,
+        question_id=question.id,
+        question_text=question.text,
+        content=answer.content,
+        model_name=answer.model_name,
+        review_status=answer.review_status,
+        asker_email=email,
+        created_at=answer.created_at,
+        allowed_decisions=allowed_decisions(answer.review_status),
+        citations=[
+            CitationOut(
+                marker=citation.marker,
+                document_id=chunk.document_id,
+                page=chunk.page_number,
+                snippet=chunk.content[:SNIPPET_CHARS],
+                similarity=float(citation.similarity),
+            )
+            for citation, chunk in citation_rows
+        ],
+    )
 
 
 async def decide(

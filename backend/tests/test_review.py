@@ -107,6 +107,37 @@ def test_queue_status_filter(client: TestClient) -> None:
     assert approved["items"][0]["allowedDecisions"] == []  # terminal
 
 
+def test_review_detail_includes_citations(client: TestClient) -> None:
+    answer_id = _pending_answer(client)
+    reviewer = _reviewer(client)
+
+    response = client.get(f"/api/v1/review/{answer_id}", headers=reviewer)
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["answerId"] == answer_id
+    assert body["askerEmail"] == "asker@example.com"
+    assert set(body["allowedDecisions"]) == {"approved", "flagged", "rejected"}
+    assert len(body["citations"]) >= 1
+    citation = body["citations"][0]
+    assert citation["marker"] == 1
+    assert "revenue" in citation["snippet"].lower()
+    assert citation["page"] == 1
+
+
+def test_review_detail_unknown_answer_is_404(client: TestClient) -> None:
+    reviewer = _reviewer(client)
+    response = client.get(
+        "/api/v1/review/00000000-0000-0000-0000-000000000000", headers=reviewer
+    )
+    assert response.status_code == 404
+
+
+def test_review_detail_requires_reviewer(client: TestClient) -> None:
+    answer_id = _pending_answer(client)
+    asker = _auth_headers(client, "asker@example.com")
+    assert client.get(f"/api/v1/review/{answer_id}", headers=asker).status_code == 403
+
+
 # ── decisions ─────────────────────────────────────────────────────────────
 
 

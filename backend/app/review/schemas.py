@@ -7,6 +7,7 @@ from pydantic import model_validator
 
 from app.core.schemas import CamelModel
 from app.qa.models import AnswerStatus
+from app.qa.schemas import CitationOut
 
 
 class DecisionCreate(CamelModel):
@@ -38,6 +39,11 @@ class QueueItemOut(CamelModel):
     created_at: datetime
     # §6: the UI renders only what the API allows
     allowed_decisions: list[AnswerStatus]
+
+
+class ReviewDetailOut(QueueItemOut):
+    # §3.1 review detail: the cited chunks the answer was grounded on
+    citations: list[CitationOut]
 
 
 class QueueOut(CamelModel):

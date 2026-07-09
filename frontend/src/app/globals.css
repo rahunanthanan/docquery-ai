@@ -506,6 +506,164 @@ a {
   outline-offset: 1px;
 }
 
+/* ── review / audit / admin ── */
+
+.filter-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.tab {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tab-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.filter-bar input {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 13.5px;
+  background: var(--card);
+}
+
+.review-section {
+  margin-bottom: 1.5rem;
+}
+
+.review-section h2 {
+  font-size: 16px;
+  margin: 0 0 0.15rem;
+}
+
+.review-section > .muted {
+  font-size: 12.5px;
+  margin: 0 0 0.5rem;
+}
+
+.review-question,
+.review-answer {
+  max-width: 100%;
+  align-self: auto;
+}
+
+.decision-form {
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 560px;
+}
+
+.decision-form h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.decision-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.decision-form textarea {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--card);
+  resize: vertical;
+}
+
+.decision-selected.decision-approved {
+  background: var(--accent);
+}
+
+.decision-selected.decision-flagged {
+  background: #8a6100;
+}
+
+.decision-selected.decision-rejected {
+  background: var(--danger);
+}
+
+.audit-action {
+  font-size: 12.5px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+}
+
+.audit-metadata {
+  font-size: 12px;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table select {
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  font-size: 13.5px;
+}
+
+.stat-tiles {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat-tile {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.usage-chart {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem 0.5rem 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.usage-table {
+  margin-top: 0;
+}
+
 /* ── toasts ── */
 
 .toast-stack {
