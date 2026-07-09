@@ -224,11 +224,13 @@ def test_decisions_write_audit_events(client: TestClient) -> None:
     _decide(client, reviewer, answer_id, "approved")
 
     rows = _audit_rows(answer_id)
-    assert [r[0] for r in rows] == ["answer.flagged", "answer.approved"]
-    assert rows[0][1] == "reviewer@example.com"
-    assert rows[0][2]["from_status"] == "pending_review"
-    assert rows[1][2]["from_status"] == "flagged"
-    assert rows[0][2]["has_comment"] is True
+    # the answer entity also carries an answer.generated event from the ask flow
+    assert [r[0] for r in rows] == ["answer.generated", "answer.flagged", "answer.approved"]
+    decisions = [r for r in rows if r[0].startswith("answer.") and r[0] != "answer.generated"]
+    assert decisions[0][1] == "reviewer@example.com"
+    assert decisions[0][2]["from_status"] == "pending_review"
+    assert decisions[1][2]["from_status"] == "flagged"
+    assert decisions[0][2]["has_comment"] is True
 
 
 def test_audit_events_are_append_only(client: TestClient) -> None:

@@ -3,9 +3,10 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import client_ip
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from app.core.db import get_db_session
@@ -68,10 +69,18 @@ async def get_conversation(
 
 @router.post("/{conversation_id}/questions", status_code=status.HTTP_201_CREATED)
 async def ask_question(
-    conversation_id: uuid.UUID, body: QuestionCreate, user: CurrentUser, session: DbSession
+    conversation_id: uuid.UUID,
+    body: QuestionCreate,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
 ) -> AskResponse:
     question, answer = await service.ask_question(
-        session, owner=user, conversation_id=conversation_id, text=body.text
+        session,
+        owner=user,
+        conversation_id=conversation_id,
+        text=body.text,
+        ip=client_ip(request),
     )
     return AskResponse(
         question=service.question_out(question),

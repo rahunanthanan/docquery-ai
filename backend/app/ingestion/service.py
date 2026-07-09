@@ -14,6 +14,7 @@ from pathlib import Path
 
 import structlog
 
+from app.audit.service import log_event
 from app.core.config import get_settings
 from app.core.db import get_sessionmaker
 from app.documents.models import DocStatus, Document
@@ -74,5 +75,13 @@ async def ingest_document(document_id: uuid.UUID) -> None:
             if document is not None:
                 document.status = DocStatus.failed
                 document.error_message = f"Ingestion failed: {exc}"[:500]
+                log_event(
+                    session,
+                    actor=None,  # background work — no acting user
+                    action="document.processing_failed",
+                    entity_type="document",
+                    entity_id=document.id,
+                    metadata={"error": document.error_message},
+                )
                 await session.commit()
             logger.exception("ingestion_failed", document_id=str(document_id))

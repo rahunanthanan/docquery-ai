@@ -10,6 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import client_ip
 from app.auth import service
 from app.auth.models import User
 from app.auth.schemas import LoginRequest, RegisterRequest, TokenResponse, UserOut
@@ -46,16 +47,24 @@ def _token_response(user: User, response: Response) -> TokenResponse:
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(body: RegisterRequest, session: DbSession) -> UserOut:
+async def register(body: RegisterRequest, request: Request, session: DbSession) -> UserOut:
     user = await service.register_user(
-        session, email=body.email, password=body.password, full_name=body.full_name
+        session,
+        email=body.email,
+        password=body.password,
+        full_name=body.full_name,
+        ip=client_ip(request),
     )
     return UserOut.model_validate(user)
 
 
 @router.post("/login")
-async def login(body: LoginRequest, response: Response, session: DbSession) -> TokenResponse:
-    user = await service.authenticate_user(session, email=body.email, password=body.password)
+async def login(
+    body: LoginRequest, request: Request, response: Response, session: DbSession
+) -> TokenResponse:
+    user = await service.authenticate_user(
+        session, email=body.email, password=body.password, ip=client_ip(request)
+    )
     return _token_response(user, response)
 
 

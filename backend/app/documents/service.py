@@ -13,6 +13,7 @@ from fastapi import UploadFile
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import log_event
 from app.auth.models import User
 from app.core.config import get_settings
 from app.core.errors import NotFoundError, QuotaExceeded, ValidationFailed
@@ -42,7 +43,9 @@ def _matches_magic_bytes(mime: str, content: bytes) -> bool:
     return True
 
 
-async def upload_document(session: AsyncSession, *, owner: User, upload: UploadFile) -> Document:
+async def upload_document(
+    session: AsyncSession, *, owner: User, upload: UploadFile, ip: str | None = None
+) -> Document:
     settings = get_settings()
 
     active = await session.scalar(
@@ -91,6 +94,15 @@ async def upload_document(session: AsyncSession, *, owner: User, upload: UploadF
         storage_path=relative_path,
     )
     session.add(document)
+    log_event(
+        session,
+        actor=owner,
+        action="document.uploaded",
+        entity_type="document",
+        entity_id=document_id,
+        metadata={"filename": document.filename, "mime_type": mime, "size_bytes": len(content)},
+        ip=ip,
+    )
     try:
         await session.commit()
     except Exception:
@@ -127,10 +139,19 @@ async def get_document(
 
 
 async def delete_document(
-    session: AsyncSession, *, owner: User, document_id: uuid.UUID
+    session: AsyncSession, *, owner: User, document_id: uuid.UUID, ip: str | None = None
 ) -> None:
     document = await get_document(session, owner=owner, document_id=document_id)
     document.deleted_at = datetime.now(UTC)
     # §4.2: soft-deleted documents must vanish from retrieval immediately
     await session.execute(delete(Chunk).where(Chunk.document_id == document.id))
+    log_event(
+        session,
+        actor=owner,
+        action="document.deleted",
+        entity_type="document",
+        entity_id=document.id,
+        metadata={"filename": document.filename},
+        ip=ip,
+    )
     await session.commit()

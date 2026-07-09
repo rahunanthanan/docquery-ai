@@ -34,6 +34,17 @@ docker compose up --build
 - Backend API docs → http://localhost:8000/api/docs
 - Health check → http://localhost:8000/api/v1/health
 
+The backend seeds demo data on first start (skipped if users already exist):
+
+| Account | Email | Password |
+|---|---|---|
+| User | `user@demo.docquery` | `DemoPassword1` |
+| Reviewer | `reviewer@demo.docquery` | `DemoPassword1` |
+| Admin | `admin@demo.docquery` | `DemoPassword1` |
+
+Two sample documents and four answered questions (in mixed review states)
+are created for the demo user — no API keys needed (`LLM_PROVIDER=fake`).
+
 ## Local development (without Docker)
 
 ```bash

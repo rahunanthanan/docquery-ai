@@ -15,6 +15,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.audit.router import router as audit_router
 from app.auth.router import router as auth_router
 from app.core.config import get_settings
 from app.core.errors import AppError, error_envelope
@@ -22,6 +23,8 @@ from app.core.logging import configure_logging
 from app.documents.router import router as documents_router
 from app.qa.router import router as qa_router
 from app.review.router import router as review_router
+from app.usage.router import router as usage_router
+from app.users.router import router as users_router
 
 logger = structlog.get_logger()
 
@@ -101,6 +104,9 @@ def create_app() -> FastAPI:
     app.include_router(documents_router)
     app.include_router(qa_router)
     app.include_router(review_router)
+    app.include_router(audit_router)
+    app.include_router(users_router)
+    app.include_router(usage_router)
 
     app.add_exception_handler(AppError, _handle_app_error)
     app.add_exception_handler(StarletteHTTPException, _handle_http_exception)

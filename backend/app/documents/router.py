@@ -3,9 +3,10 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import client_ip
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from app.core.db import get_db_session
@@ -21,9 +22,15 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 @router.post("", status_code=status.HTTP_202_ACCEPTED)
 async def upload_document(
-    file: UploadFile, background: BackgroundTasks, user: CurrentUser, session: DbSession
+    file: UploadFile,
+    background: BackgroundTasks,
+    request: Request,
+    user: CurrentUser,
+    session: DbSession,
 ) -> DocumentOut:
-    document = await service.upload_document(session, owner=user, upload=file)
+    document = await service.upload_document(
+        session, owner=user, upload=file, ip=client_ip(request)
+    )
     background.add_task(ingest_document, document.id)  # §9: v1 runs ingestion in-process
     return DocumentOut.model_validate(document)
 
@@ -55,5 +62,9 @@ async def get_document(
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_document(document_id: uuid.UUID, user: CurrentUser, session: DbSession) -> None:
-    await service.delete_document(session, owner=user, document_id=document_id)
+async def delete_document(
+    document_id: uuid.UUID, request: Request, user: CurrentUser, session: DbSession
+) -> None:
+    await service.delete_document(
+        session, owner=user, document_id=document_id, ip=client_ip(request)
+    )

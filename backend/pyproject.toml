@@ -44,6 +44,7 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM"]
 [tool.ruff.lint.isort]
 # our alembic/ scripts directory makes ruff misclassify the alembic package
 known-third-party = ["alembic"]
+known-first-party = ["app", "scripts", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
 # Exception names (ValidationFailed, InvalidTransition, QuotaExceeded) are

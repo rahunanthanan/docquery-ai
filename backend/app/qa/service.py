@@ -11,6 +11,7 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.audit.service import log_event
 from app.auth.models import User
 from app.core.errors import NotFoundError
 from app.ingestion.models import Chunk
@@ -65,13 +66,28 @@ async def get_conversation(
 
 
 async def ask_question(
-    session: AsyncSession, *, owner: User, conversation_id: uuid.UUID, text: str
+    session: AsyncSession,
+    *,
+    owner: User,
+    conversation_id: uuid.UUID,
+    text: str,
+    ip: str | None = None,
 ) -> tuple[Question, AnswerOut | None]:
     conversation = await get_conversation(
         session, owner=owner, conversation_id=conversation_id
     )
     question = Question(conversation_id=conversation.id, asked_by=owner.id, text=text)
     session.add(question)
+    await session.flush()
+    log_event(
+        session,
+        actor=owner,
+        action="question.asked",
+        entity_type="question",
+        entity_id=question.id,
+        metadata={"conversation_id": str(conversation.id)},
+        ip=ip,
+    )
     await session.commit()  # §9: saved before any LLM call can fail
     await session.refresh(question)
 
@@ -118,6 +134,21 @@ async def ask_question(
                 similarity=round(chunk.similarity, 3),
             )
         )
+    log_event(
+        session,
+        actor=owner,
+        action="answer.generated",
+        entity_type="answer",
+        entity_id=answer.id,
+        metadata={
+            "model": result.model_name,
+            "prompt_tokens": result.prompt_tokens,
+            "completion_tokens": result.completion_tokens,
+            "cost_usd": str(answer.cost_usd),
+            "latency_ms": latency_ms,
+        },
+        ip=ip,
+    )
     await session.commit()
     await session.refresh(answer)
     return question, _answer_out(answer, citation_out)
