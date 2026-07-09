@@ -79,7 +79,10 @@ This repository is built incrementally in reviewable, commit-sized tasks (see [C
 - [x] Task 7 — Human review workflow with status transitions
 - [x] Task 8 — Audit log & usage dashboard APIs, seed data
 - [x] Task 9 — Frontend foundation: API client, auth flow, RoleGuard, layout
-- [ ] Tasks 10–13 — Frontend features: documents, chat, review queue, admin
+- [x] Task 10 — Documents UI: drag-drop upload, status table, detail, delete
+- [x] Task 11 — Chat UI: conversations, citation chips & source cards
+- [x] Task 12 — Review queue, decision form, audit table, admin pages
+- [x] Task 13 — Screenshots, docs, CI hardening — **roadmap complete**
 
 ### Task 1 acceptance checklist
 
@@ -94,9 +97,19 @@ This repository is built incrementally in reviewable, commit-sized tasks (see [C
 
 ## Screenshots
 
-_Screenshots will be added as features land (see `docs/screenshots/`)._
+| Chat — grounded answers with citation cards | Review queue — human-in-the-loop decisions |
+|---|---|
+| ![Chat with citations](docs/screenshots/chat.png) | ![Review queue](docs/screenshots/review.png) |
+
+| Document library | Usage & cost dashboard |
+|---|---|
+| ![Documents](docs/screenshots/documents.png) | ![Usage dashboard](docs/screenshots/usage.png) |
+
+Captured from the seeded demo (`frontend/scripts/capture-screenshots.mjs`).
 
 ## Architecture notes
+
+Deep dives: [docs/architecture.md](docs/architecture.md) (request lifecycle, RAG pipeline, review & audit design) · [docs/api.md](docs/api.md) (full endpoint reference).
 
 - **Monorepo**: `backend/` and `frontend/` are independent deployables sharing one compose file and one CI pipeline with per-app jobs.
 - **Config as code**: every environment variable is declared in `backend/app/core/config.py` (Pydantic Settings) and mirrored in `.env.example` — no hidden knobs.
